@@ -1,14 +1,15 @@
 ---Startup sequence
 function onModLoaded()
+    tm.physics.AddTexture("data_static/terminal_Icon.png", "icon")
     if tm.os.IsSingleplayer() then
-        tm.playerUI.AddSubtleMessageForAllPlayers("terminalTest", "Not available in singleplayer.", 3.0, "")
+        tm.playerUI.AddSubtleMessageForAllPlayers("terminalMod", "Not available in singleplayer.", 3.0, "")
         return
     end
 
     adminId = 0
     playerList = {}
     tm.os.Log("Mod started.")
-    tm.playerUI.AddSubtleMessageForPlayer(adminId, "terminalTest", "Mod started.", 3.0, "")
+    --tm.playerUI.AddSubtleMessageForPlayer(adminId, "terminalMod", "Mod started.", 3.0, "")
 
     blacklist = {}
     for line in string.gmatch(tm.os.ReadAllText_Dynamic("blacklist.csv"), "[^\n]+") do
@@ -39,8 +40,13 @@ function PlayerJoin(player)
         if ProfileId == blacklist[i][blacklistId] then
             tm.os.Log("Kicked: On blacklist.")
             tm.players.Kick(Id)
+            tm.playerUI.AddSubtleMessageForPlayer(adminId, "terminalMod", "Blacklisted player kicked.", 3.0, "icon")
+            return
         end
     end
+
+    tm.physics.AddTexture("data_static/terminal_Icon.png", "icon")
+    tm.playerUI.AddSubtleMessageForPlayer(adminId, "terminalMod", Name .." joined.", 3.0, "icon")
 end
 tm.players.OnPlayerJoined.add(PlayerJoin)
 
@@ -53,7 +59,7 @@ function playerLeaving(player)
 
     if pId == adminId then
         adminId = 0
-        tm.playerUI.AddSubtleMessageForAllPlayers("terminalTest", "Admin is now: " .. tm.players.GetPlayerName(adminId), 3.0, "")
+        tm.playerUI.AddSubtleMessageForAllPlayers("terminalMod", "Admin is now: " .. tm.players.GetPlayerName(adminId), 3.0, "")
         tm.os.Log("Admin set to " .. adminId)
     end
 
@@ -225,7 +231,7 @@ setActions = {
         local id = tonumber(words[3])
         if not id then
             tm.os.Log("Ignored: Not a number.")
-            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Id must be a number.", 3.0, "")
+            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Id must be a number.", 3.0, "icon")
             return
         end
 
@@ -235,14 +241,14 @@ setActions = {
             if id == playerList[i] then
                 tm.playerUI.ClearUI(adminId)
                 adminId = id
-                tm.playerUI.AddSubtleMessageForAllPlayers("terminalTest", "Admin is now: " .. tm.players.GetPlayerName(adminId), 3.0, "")
+                tm.playerUI.AddSubtleMessageForAllPlayers("terminalMod", "Admin is now: " .. tm.players.GetPlayerName(adminId), 3.0, "icon")
                 tm.os.Log("Admin set to " .. adminId)
                 return
             end
         end
 
         tm.os.Log("Ignored: Not a player.")
-        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Player does not exist.", 3.0, "")
+        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Player does not exist.", 3.0, "icon")
     end
 }
 
@@ -255,15 +261,15 @@ blacklistActions = {
         local id = tonumber(words [3])
         if not id then
             tm.os.Log("Ignored: Not a number.")
-            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Id must be a number.", 3.0, "")
+            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Id must be a number.", 3.0, "icon")
             return
         end
 
         id = id -1
         if id == 0 or id == adminId then
             tm.os.Log("Ignored: Admin.")
-            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Cant blacklist admin", 3.0, "")
-            --return
+            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Cant blacklist admin", 3.0, "icon")
+            return
         end
 
         for i = 1, #playerList do
@@ -299,13 +305,13 @@ blacklistActions = {
                 tm.os.WriteAllText_Dynamic("blacklist.csv", newBlacklistStr)
 
                 tm.players.Kick(id)
-                tm.playerUI.AddSubtleMessageForPlayer(adminId, "Player blacklisted", "Player was also kicked", 3.0, "")
+                tm.playerUI.AddSubtleMessageForPlayer(adminId, "Player blacklisted", "Player was also kicked", 3.0, "icon")
                 return
             end
         end
 
         tm.os.Log("Ignored: Not a player.")
-        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Player does not exist.", 3.0, "")
+        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Player does not exist.", 3.0, "icon")
     end,
 
     ---Removes all instance of a player from blacklist
@@ -320,9 +326,9 @@ blacklistActions = {
         end
 
         if found then
-            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Succes", "Player removed from blacklist", 3.0, "")
+            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Succes", "Player removed from blacklist", 3.0, "icon")
         else
-            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Error", "Player not in blacklist", 3.0, "")
+            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Error", "Player not in blacklist", 3.0, "icon")
             tm.os.Log("Ignored: not found")
             return
         end
@@ -343,7 +349,7 @@ blacklistActions = {
     clear = function (words)
         tm.os.WriteAllText_Dynamic("blacklist.csv", "\n")
         blacklist = {}
-        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Blacklist cleared", "", 3.0, "")
+        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Blacklist cleared", "", 3.0, "icon")
     end,
 
     ---List out the blacklist
@@ -373,7 +379,7 @@ commands = {
         end
 
         tm.os.Log("Ignored: Invalid argument.")
-        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help\" for arguments.", 3.0, "")
+        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help\" for arguments.", 3.0, "icon")
     end,
 
     ---List out all of a thing
@@ -387,7 +393,7 @@ commands = {
         end
 
         tm.os.Log("Ignored: Invalid argument.")
-        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help list\" for arguments.", 3.0, "")
+        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help list\" for arguments.", 3.0, "icon")
     end,
 
     ---Clears the ui
@@ -400,7 +406,7 @@ commands = {
         end
 
         tm.os.Log("Ignored: Invalid argument.")
-        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help set\" for arguments.", 3.0, "")
+        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help set\" for arguments.", 3.0, "icon")
     end,
 
     ---Sets values specified by user
@@ -413,7 +419,7 @@ commands = {
         end
 
         tm.os.Log("Ignored: Invalid argument.")
-        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help blacklist\" for arguments.", 3.0, "")
+        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help blacklist\" for arguments.", 3.0, "icon")
     end,
 
     ---Kicks a player
@@ -421,7 +427,7 @@ commands = {
         local id = tonumber(words [2])
         if not id then
             tm.os.Log("Ignored: Not a number.")
-            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Id must be a number.", 3.0, "")
+            tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Id must be a number.", 3.0, "icon")
             return
         end
 
@@ -430,13 +436,13 @@ commands = {
         for i = 1, #playerList do
             if id == playerList[i] then
                 tm.players.Kick(id)
-                tm.playerUI.AddSubtleMessageForPlayer(adminId, "Player kicked", "", 3.0, "")
+                tm.playerUI.AddSubtleMessageForPlayer(adminId, "Player kicked", "", 3.0, "icon")
                 return
             end
         end
 
         tm.os.Log("Ignored: Not a player.")
-        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Player does not exist.", 3.0, "")
+        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid id", "Player does not exist.", 3.0, "icon")
     end,
 
     ---Manages a blacklist
@@ -449,7 +455,7 @@ commands = {
         end
 
         tm.os.Log("Ignored: Invalid argument.")
-        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help blacklist\" for arguments.", 3.0, "")
+        tm.playerUI.AddSubtleMessageForPlayer(adminId, "Invalid arguments", "\"/help blacklist\" for arguments.", 3.0, "icon")
     end
 }
 
@@ -477,7 +483,7 @@ function chatSent(player, message)
         end
     end
     tm.os.Log("Not a command.")
-    tm.playerUI.AddSubtleMessageForPlayer(adminId, "Not a command.", "\"/help\" for commands.", 3.0, "")
+    tm.playerUI.AddSubtleMessageForPlayer(adminId, "Not a command.", "\"/help\" for commands.", 3.0, "icon")
 end
 
 tm.playerUI.OnChatMessage.add(chatSent)
